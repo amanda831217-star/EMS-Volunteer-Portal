@@ -44,6 +44,12 @@ function formatDateText(dateText) {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
+function isSameDate(a, b) {
+  return a.getFullYear() === b.getFullYear() &&
+         a.getMonth() === b.getMonth() &&
+         a.getDate() === b.getDate();
+}
+
 function getActiveBanner() {
   return (state.banners || []).find(x => x.active !== false) || null;
 }
@@ -297,10 +303,13 @@ function renderCalendar() {
   const gridEl = document.getElementById('calendarArea');
   const monthListEl = document.getElementById('monthList');
   const titleEl = document.getElementById('calendarTitle');
+  const monthEventCountEl = document.getElementById('calendarMonthEventCount');
+  const monthTrainingCountEl = document.getElementById('calendarMonthTrainingCount');
 
   if (!gridEl || !monthListEl || !titleEl) return;
 
   const now = new Date();
+
   if (state.calendarYear === null || state.calendarMonth === null) {
     if (state.events[0]) {
       const d = new Date(state.events[0].date + 'T00:00:00');
@@ -314,14 +323,18 @@ function renderCalendar() {
 
   const year = state.calendarYear;
   const month = state.calendarMonth;
+  const monthEvents = getMonthEvents(year, month);
+  const monthTrainings = getMonthTrainingEvents(year, month);
+
   titleEl.textContent = `${year} / ${String(month + 1).padStart(2, '0')}`;
+  if (monthEventCountEl) monthEventCountEl.textContent = monthEvents.length;
+  if (monthTrainingCountEl) monthTrainingCountEl.textContent = monthTrainings.length;
 
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
   const eventMap = buildMonthEventsMap(year, month);
 
-  const html = weekdays.map(w => `<div class="weekday">${w}</div>`);
+  const html = [];
 
   for (let i = 0; i < firstDay; i++) {
     html.push('<div class="day-cell empty"></div>');
@@ -332,11 +345,18 @@ function renderCalendar() {
       .slice()
       .sort((a, b) => Number(a.sort || 9999) - Number(b.sort || 9999));
 
+    const cellDate = new Date(year, month, day);
+    const today = isSameDate(cellDate, now);
+    const hasEvents = items.length > 0;
+
     html.push(`
-      <div class="day-cell">
-        <div class="day-num">${day}</div>
+      <div class="day-cell ${hasEvents ? 'has-events' : ''} ${today ? 'today' : ''}">
+        <div class="day-top">
+          <div class="day-num">${day}</div>
+          <div class="day-dot ${hasEvents ? 'has-event' : ''}"></div>
+        </div>
         <div class="day-events">
-          ${items.map(item => `
+          ${items.slice(0, 3).map(item => `
             <div class="day-pill ${item.type === '大隊定訓' ? 'command' : item.type === '分隊定訓' ? 'unit' : 'other'}">
               ${escapeHtml(item.title)}
             </div>
@@ -348,18 +368,18 @@ function renderCalendar() {
 
   gridEl.innerHTML = html.join('');
 
-  const monthEvents = getMonthEvents(year, month)
-    .sort((a, b) => a.date.localeCompare(b.date) || Number(a.sort || 9999) - Number(b.sort || 9999));
-
   monthListEl.innerHTML = monthEvents.length
-    ? monthEvents.map(item => `
-      <div class="list-card">
-        <div class="notice-title">${formatDateText(item.date)}｜${escapeHtml(item.title)}</div>
-        <div class="notice-body">${escapeHtml(item.type)}｜${escapeHtml(item.location || '')}</div>
-        <div class="muted">${escapeHtml(item.message || '')}</div>
-        ${linkHtml(item.link)}
-      </div>
-    `).join('')
+    ? monthEvents
+        .slice()
+        .sort((a, b) => a.date.localeCompare(b.date) || Number(a.sort || 9999) - Number(b.sort || 9999))
+        .map(item => `
+          <div class="list-card">
+            <div class="notice-title">${formatDateText(item.date)}｜${escapeHtml(item.title)}</div>
+            <div class="notice-body">${escapeHtml(item.type)}｜${escapeHtml(item.location || '')}</div>
+            <div class="muted">${escapeHtml(item.message || '')}</div>
+            ${linkHtml(item.link)}
+          </div>
+        `).join('')
     : `<div class="list-card"><div class="notice-title">本月無活動</div><div class="notice-body">目前沒有排定活動資料。</div></div>`;
 
   updateStats();
