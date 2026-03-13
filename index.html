@@ -22,53 +22,56 @@
   <main>
 
     <section id="panel-home" class="panel active">
-      <section id="bannerArea"></section>
+  <section id="bannerArea"></section>
 
-      <div class="stats-grid stats-grid-2">
-        <div class="stat-card tone-blue">
-          <div class="stat-label">本月活動</div>
-          <div class="stat-value" id="statEvents">0</div>
-          <div class="stat-tip">當月活動數</div>
+  <div class="stats-grid stats-grid-2">
+    <div class="stat-card tone-blue">
+      <div class="stat-label">本月活動</div>
+      <div class="stat-value" id="statEvents">0</div>
+      <div class="stat-tip">當月活動數</div>
+    </div>
+
+    <div class="stat-card tone-purple">
+      <div class="stat-label">累計活動次數</div>
+      <div class="stat-value" id="statTotalEvents">0</div>
+      <div class="stat-tip">全部活動數</div>
+    </div>
+  </div>
+
+  <div class="home-dual-grid">
+    <section class="card-block tone-section-blue">
+      <div class="block-head">
+        <div>
+          <h2>公告與統整</h2>
+          <p>公告、連結、與近三個月統整</p>
         </div>
-
-        <div class="stat-card tone-purple">
-          <div class="stat-label">累計活動次數</div>
-          <div class="stat-value" id="statTotalEvents">0</div>
-          <div class="stat-tip">全部活動數</div>
+        <div class="top-actions">
+          <span class="tag tag-blue">📢 公告</span>
+          <a class="mini-link-btn" href="admin.html">新增公告</a>
         </div>
+      </div>
 
-      <section class="card-block tone-section-blue">
-        <div class="block-head">
-          <div>
-            <h2>公告與統整</h2>
-            <p>公告、連結、與近三個月統整</p>
-          </div>
-          <div class="top-actions">
-            <span class="tag tag-blue">📢 公告</span>
-            <a class="mini-link-btn" href="admin.html">新增公告</a>
-          </div>
-        </div>
+      <div id="noticeArea"></div>
 
-        <div id="noticeArea"></div>
-
-        <div class="summary-panel">
-          <div class="summary-panel-head">📊 近三個月統整</div>
-          <div id="summaryArea"></div>
-        </div>
-      </section>
-
-      <section class="card-block tone-section-red">
-        <div class="block-head">
-          <div>
-            <h2>活動卡片</h2>
-            <p>點擊直接跳到定訓頁面</p>
-          </div>
-          <span class="tag tag-red">🗂 活動</span>
-        </div>
-        <div id="homeEventList" class="mobile-card-list"></div>
-      </section>
+      <div class="summary-panel">
+        <div class="summary-panel-head">📊 近三個月統整</div>
+        <div id="summaryArea"></div>
+      </div>
     </section>
 
+    <section class="card-block tone-section-red">
+      <div class="block-head">
+        <div>
+          <h2>活動卡片</h2>
+          <p>點擊直接跳到定訓頁面</p>
+        </div>
+        <span class="tag tag-red">🗂 活動</span>
+      </div>
+
+      <div id="homeEventList" class="mobile-card-list"></div>
+    </section>
+  </div>
+</section>
     <section id="panel-training" class="panel">
       <section class="card-block tone-section-white">
         <div class="block-head">
