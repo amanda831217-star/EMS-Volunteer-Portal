@@ -57,6 +57,33 @@ function resetMemberForm() {
   document.getElementById('memberFormTitle').textContent = '新增人員';
 }
 
+function openCollapseById(id) {
+  const body = document.getElementById(id);
+  const btn = document.querySelector(`[data-collapse-target="${id}"]`);
+  if (!body || !btn) return;
+  body.classList.add('open');
+  btn.textContent = '收起 ▲';
+}
+
+function bindCollapseButtons() {
+  document.querySelectorAll('[data-collapse-target]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.collapseTarget;
+      const body = document.getElementById(id);
+      if (!body) return;
+
+      const opened = body.classList.contains('open');
+      if (opened) {
+        body.classList.remove('open');
+        btn.textContent = '展開 ▼';
+      } else {
+        body.classList.add('open');
+        btn.textContent = '收起 ▲';
+      }
+    });
+  });
+}
+
 function renderBanners(items) {
   document.getElementById('bannerList').innerHTML = items.map(item => `
     <div class="admin-list-item">
@@ -124,6 +151,7 @@ function bindAdminActions() {
       document.getElementById('noticeLink').value = item.link || '';
       document.getElementById('noticeSort').value = item.sort || '';
       document.getElementById('noticeFormTitle').textContent = '修改公告';
+      openCollapseById('noticeCollapseBody');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
@@ -153,6 +181,7 @@ function bindAdminActions() {
       document.getElementById('eventLink').value = item.link || '';
       document.getElementById('eventSort').value = item.sort || '';
       document.getElementById('eventFormTitle').textContent = '修改活動';
+      openCollapseById('eventCollapseBody');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
@@ -176,6 +205,7 @@ function bindAdminActions() {
       document.getElementById('memberEditId').value = item.memberId;
       document.getElementById('memberName').value = item.memberName || '';
       document.getElementById('memberFormTitle').textContent = '修改人員';
+      openCollapseById('memberCollapseBody');
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
   });
@@ -216,6 +246,8 @@ async function loadAdmin() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  bindCollapseButtons();
+
   document.getElementById('saveNoticeBtn').addEventListener('click', async () => {
     const noticeId = document.getElementById('noticeEditId').value.trim();
     const title = document.getElementById('noticeTitle').value.trim();
