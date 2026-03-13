@@ -6,7 +6,8 @@ const state = {
   notices: [],
   events: [],
   calendarYear: null,
-  calendarMonth: null
+  calendarMonth: null,
+  expandedTraining: {}
 };
 
 const demoData = {
@@ -117,9 +118,6 @@ function renderHeroBanner() {
         <div class="hero-photo-text">
           <div class="hero-photo-title">救護義消團隊</div>
           <div class="hero-photo-sub">團結、支援、守護，每一次出勤都是彼此信任的展現。</div>
-          <div class="hero-photo-actions">
-            <a class="hero-mini-btn" href="${escapeHtml(ADMIN_URL)}">返回後台</a>
-          </div>
         </div>
       </div>
     `;
@@ -133,9 +131,6 @@ function renderHeroBanner() {
       <div class="hero-photo-text">
         <div class="hero-photo-title">${escapeHtml(banner.title || '救護義消團隊')}</div>
         <div class="hero-photo-sub">${escapeHtml(banner.caption || '團結、支援、守護，每一次出勤都是彼此信任的展現。')}</div>
-        <div class="hero-photo-actions">
-          <a class="hero-mini-btn" href="${escapeHtml(ADMIN_URL)}">返回後台</a>
-        </div>
       </div>
     </div>
   `;
@@ -145,7 +140,7 @@ function renderNotices() {
   const el = document.getElementById('noticeArea');
   if (!el) return;
 
-  el.innerHTML = state.notices
+  const html = state.notices
     .slice()
     .sort((a, b) => Number(a.sort || 9999) - Number(b.sort || 9999))
     .map(item => `
@@ -154,14 +149,22 @@ function renderNotices() {
         <div class="notice-body">${escapeHtml(item.body)}</div>
         ${linkHtml(item.link, '查看通知')}
       </div>
-    `).join('');
+    `)
+    .join('');
+
+  el.innerHTML = html || `
+    <div class="notice-card">
+      <div class="notice-title">目前無公告</div>
+      <div class="notice-body">尚未新增公告資料。</div>
+    </div>
+  `;
 }
 
 function renderHomeEvents() {
   const el = document.getElementById('homeEventList');
   if (!el) return;
 
-  el.innerHTML = state.events
+  const html = state.events
     .slice()
     .sort((a, b) => a.date.localeCompare(b.date) || Number(a.sort || 9999) - Number(b.sort || 9999))
     .map(item => `
@@ -176,7 +179,15 @@ function renderHomeEvents() {
         <div class="muted">${escapeHtml(item.message || '')}</div>
         ${linkHtml(item.link)}
       </div>
-    `).join('');
+    `)
+    .join('');
+
+  el.innerHTML = html || `
+    <div class="event-mobile-card">
+      <div class="event-mobile-title">目前無活動</div>
+      <div class="muted">請至後台新增活動。</div>
+    </div>
+  `;
 }
 
 function renderHomeSummary() {
@@ -233,6 +244,7 @@ function renderTraining() {
     const joined = (event.members || []).filter(m => m.status === '參加').length;
     const meat = (event.members || []).filter(m => m.meal === '葷食').length;
     const veg = (event.members || []).filter(m => m.meal === '素食').length;
+    const isExpanded = !!state.expandedTraining[event.id];
 
     return `
       <div class="training-card">
@@ -246,31 +258,39 @@ function renderTraining() {
           <span class="tag tag-blue">${joined} 人參加</span>
         </div>
 
-        ${(event.members || []).map((member, idx) => `
-          <div class="member-row">
-            <div class="member-left">
-              <div class="member-name">${escapeHtml(member.name)}</div>
-              <div class="member-sub">點選即可回覆</div>
-            </div>
-
-            <div class="member-right">
-              <div class="btn-row">
-                <button class="action-btn join ${member.status === '參加' ? 'active' : ''}" data-event="${event.id}" data-member="${idx}" data-status="參加">參加</button>
-                <button class="action-btn absent ${member.status === '無法參加' ? 'active' : ''}" data-event="${event.id}" data-member="${idx}" data-status="無法參加">無法參加</button>
-              </div>
-
-              <div class="btn-row">
-                <button class="action-btn meat ${member.meal === '葷食' ? 'active' : ''}" ${member.status === '無法參加' ? 'disabled' : ''} data-event="${event.id}" data-member="${idx}" data-meal="葷食">葷食</button>
-                <button class="action-btn veg ${member.meal === '素食' ? 'active' : ''}" ${member.status === '無法參加' ? 'disabled' : ''} data-event="${event.id}" data-member="${idx}" data-meal="素食">素食</button>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-
         <div class="summary-strip">
           <div class="summary-chip">參加 ${joined} 人</div>
           <div class="summary-chip">葷食 ${meat} 份</div>
           <div class="summary-chip">素食 ${veg} 份</div>
+        </div>
+
+        <div class="training-toggle-wrap">
+          <button class="toggle-btn" data-toggle-event="${event.id}">
+            ${isExpanded ? '收起名單 ▲' : '展開名單 ▼'}
+          </button>
+        </div>
+
+        <div class="member-container" id="members-${event.id}" style="display:${isExpanded ? 'block' : 'none'}">
+          ${(event.members || []).map((member, idx) => `
+            <div class="member-row">
+              <div class="member-left">
+                <div class="member-name">${escapeHtml(member.name)}</div>
+                <div class="member-sub">點選即可回覆</div>
+              </div>
+
+              <div class="member-right">
+                <div class="btn-row">
+                  <button class="action-btn join ${member.status === '參加' ? 'active' : ''}" data-event="${event.id}" data-member="${idx}" data-status="參加">參加</button>
+                  <button class="action-btn absent ${member.status === '無法參加' ? 'active' : ''}" data-event="${event.id}" data-member="${idx}" data-status="無法參加">無法參加</button>
+                </div>
+
+                <div class="btn-row">
+                  <button class="action-btn meat ${member.meal === '葷食' ? 'active' : ''}" ${member.status === '無法參加' ? 'disabled' : ''} data-event="${event.id}" data-member="${idx}" data-meal="葷食">葷食</button>
+                  <button class="action-btn veg ${member.meal === '素食' ? 'active' : ''}" ${member.status === '無法參加' ? 'disabled' : ''} data-event="${event.id}" data-member="${idx}" data-meal="素食">素食</button>
+                </div>
+              </div>
+            </div>
+          `).join('')}
         </div>
       </div>
     `;
@@ -284,6 +304,7 @@ function renderTraining() {
   `;
 
   bindTrainingButtons();
+  bindTrainingToggleButtons();
 }
 
 function buildMonthEventsMap(year, month) {
@@ -481,6 +502,16 @@ function bindTrainingButtons() {
       renderTraining();
       renderCalendar();
       await saveResponse(eventId, member.name, member.status, member.meal);
+    });
+  });
+}
+
+function bindTrainingToggleButtons() {
+  document.querySelectorAll('[data-toggle-event]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const eventId = btn.dataset.toggleEvent;
+      state.expandedTraining[eventId] = !state.expandedTraining[eventId];
+      renderTraining();
     });
   });
 }
