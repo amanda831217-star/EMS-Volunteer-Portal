@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>救護義消活動平台</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <header class="hero">
+    <div class="hero-top">
+      <div class="hero-badge">救護義消活動平台</div>
+      <a class="hero-admin-btn" href="admin.html">返回後台</a>
+    </div>
+    <h1>活動通知、定訓回覆、月曆檢視</h1>
+    <p>手機版活動資訊平台</p>
+  </header>
+
+  <main>
+    <section id="panel-home" class="panel active">
+      <section id="bannerArea"></section>
+
+      <div class="stats-grid">
+        <div class="stat-card tone-blue">
+          <div class="stat-label">本月活動</div>
+          <div class="stat-value" id="statEvents">0</div>
+          <div class="stat-tip">活動 / 公告</div>
+        </div>
+        <div class="stat-card tone-red">
+          <div class="stat-label">已回覆人次</div>
+          <div class="stat-value" id="statReplies">0</div>
+          <div class="stat-tip">即時更新</div>
+        </div>
+        <div class="stat-card tone-lightblue">
+          <div class="stat-label">葷食便當</div>
+          <div class="stat-value" id="statMeat">0</div>
+          <div class="stat-tip">本月累計</div>
+        </div>
+        <div class="stat-card tone-lightred">
+          <div class="stat-label">素食便當</div>
+          <div class="stat-value" id="statVeg">0</div>
+          <div class="stat-tip">本月累計</div>
+        </div>
+      </div>
+
+      <section class="card-block tone-section-blue">
+        <div class="block-head">
+          <div>
+            <h2>公告與統整</h2>
+            <p>公告、重要連結、本月統整</p>
+          </div>
+          <div class="top-actions">
+            <span class="tag tag-blue">📢 公告</span>
+            <a class="mini-link-btn" href="admin.html">新增公告</a>
+          </div>
+        </div>
+
+        <div id="noticeArea"></div>
+
+        <div class="summary-panel">
+          <div class="summary-panel-head">📊 本月統整</div>
+          <div id="summaryArea"></div>
+        </div>
+      </section>
+
+      <section class="card-block tone-section-red">
+        <div class="block-head">
+          <div>
+            <h2>活動卡片</h2>
+            <p>手機版活動總覽</p>
+          </div>
+          <span class="tag tag-red">🗂 活動</span>
+        </div>
+        <div id="homeEventList" class="mobile-card-list"></div>
+      </section>
+    </section>
+
+    <section id="panel-training" class="panel">
+      <section class="card-block tone-section-white">
+        <div class="block-head">
+          <div>
+            <h2>定訓活動</h2>
+            <p>大隊定訓 / 分隊定訓，直接點選回覆</p>
+          </div>
+          <div class="top-actions">
+            <span class="tag tag-blue" id="trainingCount">0 場</span>
+            <a class="mini-link-btn" href="admin.html">新增活動</a>
+          </div>
+        </div>
+
+        <div id="trainingArea" class="training-mobile-list"></div>
+      </section>
+    </section>
+
+    <section id="panel-calendar" class="panel">
+      <section class="card-block tone-section-blue">
+        <div class="calendar-month-card">
+          <button class="calendar-nav-btn" id="prevMonthBtn" type="button">上月</button>
+          <div class="calendar-title-wrap">
+            <h2>活動月曆</h2>
+            <p id="calendarTitle">2026 / 03</p>
+          </div>
+          <button class="calendar-nav-btn" id="nextMonthBtn" type="button">下月</button>
+        </div>
+
+        <div id="calendarArea" class="calendar-grid"></div>
+      </section>
+
+      <section class="card-block tone-section-white">
+        <div class="block-head">
+          <div>
+            <h2>本月活動清單</h2>
+            <p>依日期排列</p>
+          </div>
+        </div>
+        <div id="monthList"></div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-panel="home">🏠<br>首頁</button>
+  <button class="nav-btn" data-panel="training">📢<br>定訓</button>
+  <button class="nav-btn" data-panel="calendar">📅<br>月曆</button>
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>
