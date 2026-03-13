@@ -96,25 +96,55 @@
     </section>
 
     <section id="panel-calendar" class="panel">
-      <section class="card-block tone-section-blue">
-        <div class="calendar-month-card">
-          <button class="calendar-nav-btn" id="prevMonthBtn" type="button">上月</button>
-          <div class="calendar-title-wrap">
-            <h2>活動月曆</h2>
-            <p id="calendarTitle">2026 / 03</p>
+      <section class="calendar-shell">
+        <div class="calendar-hero-card">
+          <div class="calendar-hero-top">
+            <div class="calendar-hero-text">
+              <div class="calendar-kicker">Activity Calendar</div>
+              <h2>活動月曆</h2>
+              <p id="calendarTitle">2026 / 03</p>
+            </div>
+
+            <div class="calendar-hero-actions">
+              <button class="calendar-circle-btn" id="prevMonthBtn" type="button" aria-label="上月">‹</button>
+              <button class="calendar-circle-btn" id="nextMonthBtn" type="button" aria-label="下月">›</button>
+            </div>
           </div>
-          <button class="calendar-nav-btn" id="nextMonthBtn" type="button">下月</button>
+
+          <div class="calendar-hero-stats">
+            <div class="calendar-mini-stat">
+              <span class="calendar-mini-label">本月活動</span>
+              <span class="calendar-mini-value" id="calendarMonthEventCount">0</span>
+            </div>
+            <div class="calendar-mini-stat">
+              <span class="calendar-mini-label">定訓場次</span>
+              <span class="calendar-mini-value" id="calendarMonthTrainingCount">0</span>
+            </div>
+          </div>
         </div>
 
-        <div id="calendarArea" class="calendar-grid"></div>
+        <div class="calendar-board-card">
+          <div class="calendar-week-header">
+            <div class="week-pill">日</div>
+            <div class="week-pill">一</div>
+            <div class="week-pill">二</div>
+            <div class="week-pill">三</div>
+            <div class="week-pill">四</div>
+            <div class="week-pill">五</div>
+            <div class="week-pill">六</div>
+          </div>
+
+          <div id="calendarArea" class="calendar-grid app-calendar-grid"></div>
+        </div>
       </section>
 
-      <section class="card-block tone-section-white">
+      <section class="card-block tone-section-white calendar-list-block">
         <div class="block-head">
           <div>
             <h2>本月活動清單</h2>
             <p>依日期排列</p>
           </div>
+          <span class="tag tag-blue">📅 月檢視</span>
         </div>
         <div id="monthList"></div>
       </section>
