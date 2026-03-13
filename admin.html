@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>救護義消活動平台｜後台管理</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <header class="hero">
+    <div class="hero-top">
+      <div class="hero-badge">後台管理</div>
+      <a class="hero-admin-btn" href="index.html">返回前台</a>
+    </div>
+    <h1>公告 / 活動 / 人員</h1>
+    <p>主圖由 Google 試算表維護，其餘由後台管理。</p>
+  </header>
+
+  <section class="form-card">
+    <h3>首頁主圖</h3>
+    <div class="sheet-tip">
+      主圖請至 Google 試算表 Banners 工作表修改。
+    </div>
+    <div id="bannerList"></div>
+  </section>
+
+  <section class="form-card">
+    <h3 id="noticeFormTitle">新增公告</h3>
+    <input type="hidden" id="noticeEditId">
+    <input id="noticeTitle" class="input" placeholder="公告標題">
+    <textarea id="noticeMessage" class="textarea" placeholder="公告內容"></textarea>
+    <input id="noticeLink" class="input" placeholder="外部連結">
+    <input id="noticeSort" class="input" type="number" placeholder="排序，數字越小越前面">
+    <button class="primary-btn" type="button" id="saveNoticeBtn">儲存公告</button>
+    <button class="secondary-btn" type="button" id="cancelNoticeBtn">取消編輯</button>
+  </section>
+
+  <section class="card-block tone-section-white">
+    <div class="block-head">
+      <div>
+        <h2>公告列表</h2>
+        <p>可修改 / 刪除</p>
+      </div>
+    </div>
+    <div id="noticeList"></div>
+  </section>
+
+  <section class="form-card">
+    <h3 id="eventFormTitle">新增活動</h3>
+    <input type="hidden" id="eventEditId">
+    <select id="eventType" class="select">
+      <option value="大隊定訓">大隊定訓</option>
+      <option value="分隊定訓">分隊定訓</option>
+      <option value="公告活動">公告活動</option>
+    </select>
+    <input id="eventDate" class="input" type="date">
+    <input id="eventTitle" class="input" placeholder="活動標題">
+    <input id="eventLocation" class="input" placeholder="地點">
+    <textarea id="eventMessage" class="textarea" placeholder="活動訊息"></textarea>
+    <input id="eventLink" class="input" placeholder="活動連結">
+    <input id="eventSort" class="input" type="number" placeholder="排序，數字越小越前面">
+    <button class="primary-btn" type="button" id="saveEventBtn">儲存活動</button>
+    <button class="secondary-btn" type="button" id="cancelEventBtn">取消編輯</button>
+  </section>
+
+  <section class="card-block tone-section-white">
+    <div class="block-head">
+      <div>
+        <h2>活動列表</h2>
+        <p>可修改 / 刪除</p>
+      </div>
+    </div>
+    <div id="eventList"></div>
+  </section>
+
+  <section class="form-card member-bottom-block">
+    <h3 id="memberFormTitle">新增人員</h3>
+    <input type="hidden" id="memberEditId">
+    <input id="memberName" class="input" placeholder="姓名">
+    <button class="primary-btn" type="button" id="saveMemberBtn">儲存人員</button>
+    <button class="secondary-btn" type="button" id="cancelMemberBtn">取消編輯</button>
+  </section>
+
+  <section class="card-block tone-section-white member-bottom-block">
+    <div class="block-head">
+      <div>
+        <h2>人員名冊</h2>
+        <p>可修改 / 刪除</p>
+      </div>
+    </div>
+    <div id="memberList"></div>
+  </section>
+
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>
