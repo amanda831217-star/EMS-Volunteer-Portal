@@ -13,19 +13,14 @@
   --red-panel:#fff5f6;
   --white:#ffffff;
   --shadow:0 14px 36px rgba(25,61,110,.10);
-
   --join:#d7f4e4;
   --join-text:#137247;
-
   --absent:#ffe1e6;
   --absent-text:#b4233f;
-
   --meat:#eaf3ff;
   --meat-text:#0f5fd7;
-
   --veg:#fff0f2;
   --veg-text:#c2243e;
-
   --pending:#eef3f8;
   --pending-text:#5d748c;
 }
@@ -198,7 +193,7 @@ button,input,textarea,select{
   margin-bottom:14px;
 }
 
-.stats-grid-5{
+.stats-grid-3{
   grid-template-columns:1fr 1fr;
 }
 
@@ -471,29 +466,6 @@ button,input,textarea,select{
   margin-bottom:10px;
 }
 
-.summary-row{
-  display:grid;
-  grid-template-columns:1.3fr .6fr .6fr .6fr .6fr;
-  gap:8px;
-  align-items:center;
-  background:#fff;
-  border:1px solid #e3edf6;
-  border-radius:16px;
-  padding:12px;
-  margin-bottom:10px;
-}
-
-.summary-row.header{
-  background:#f4f8fe;
-  font-weight:900;
-}
-
-.summary-row div{
-  font-size:13px;
-  line-height:1.5;
-  color:#173555;
-}
-
 .summary-card{
   background:#fff;
   border:1px solid #e3edf6;
@@ -661,11 +633,6 @@ button,input,textarea,select{
   align-items:flex-end;
 }
 
-.training-toggle-wrap{
-  margin-top:12px;
-  margin-bottom:8px;
-}
-
 .toggle-btn{
   border:none;
   background:#eef4fb;
@@ -681,6 +648,7 @@ button,input,textarea,select{
 
 .member-container{
   display:none;
+  margin-top:10px;
 }
 
 .member-row{
@@ -1054,164 +1022,11 @@ button,input,textarea,select{
   color:var(--blue);
 }
 
-/* admin common */
-
-.form-card{
-  background:#fff;
-  border:1px solid #e3edf6;
-  border-radius:20px;
-  padding:14px;
-  margin-bottom:14px;
-  box-shadow:var(--shadow);
-}
-
-.form-card h3{
-  margin:0 0 10px;
-  font-size:15px;
-  color:#102b48;
-}
-
-.input,
-.textarea,
-.select{
-  width:100%;
-  border:1px solid #d7e4ef;
-  border-radius:14px;
-  background:#fff;
-  padding:11px 13px;
-  color:var(--text);
-  margin-bottom:10px;
-  outline:none;
-}
-
-.textarea{
-  min-height:96px;
-  resize:vertical;
-}
-
-.primary-btn{
-  width:100%;
-  min-height:44px;
-  border:none;
-  border-radius:14px;
-  background:var(--blue);
-  color:#fff;
-  font-size:14px;
-  font-weight:900;
-  cursor:pointer;
-}
-
-.secondary-btn{
-  width:100%;
-  min-height:38px;
-  border:none;
-  border-radius:12px;
-  background:#eef4fb;
-  color:#325271;
-  font-size:12px;
-  font-weight:900;
-  cursor:pointer;
-}
-
-.danger-btn{
-  width:100%;
-  min-height:38px;
-  border:none;
-  border-radius:12px;
-  background:#ffe8ec;
-  color:#b4233f;
-  font-size:12px;
-  font-weight:900;
-  cursor:pointer;
-}
-
-.admin-list-item{
-  background:#fff;
-  border:1px solid #e3edf6;
-  border-radius:16px;
-  padding:10px 12px;
-  margin-bottom:8px;
-}
-
-.admin-list-title{
-  font-size:13px;
-  font-weight:900;
-  margin-bottom:4px;
-  color:#102b48;
-}
-
-.admin-list-sub{
-  font-size:11px;
-  color:#5f7891;
-  line-height:1.6;
-}
-
-.admin-actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:8px;
-}
-
-.sheet-tip{
-  margin-top:8px;
-  padding:12px;
-  background:#f5f9ff;
-  border:1px dashed #cfe0f2;
-  border-radius:14px;
-  color:#47627d;
-  font-size:12px;
-  line-height:1.7;
-}
-
-.admin-collapse-card{
-  background:#fff;
-  border:1px solid #e3edf6;
-  border-radius:20px;
-  padding:14px;
-  margin-bottom:14px;
-  box-shadow:var(--shadow);
-}
-
-.admin-collapse-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-}
-
-.admin-collapse-title{
-  font-size:15px;
-  font-weight:900;
-  color:#102b48;
-}
-
-.admin-collapse-btn{
-  border:none;
-  background:#eef4fb;
-  border:1px solid #dbe6f2;
-  color:#355372;
-  padding:10px 14px;
-  border-radius:14px;
-  font-weight:900;
-  font-size:13px;
-  cursor:pointer;
-}
-
-.admin-collapse-body{
-  display:none;
-  margin-top:12px;
-}
-
-.admin-collapse-body.open{
-  display:block;
-}
-
 /* responsive */
 
 @media (max-width:360px){
-  .summary-row{
-    grid-template-columns:1fr;
+  .summary-card-top{
+    flex-direction:column;
   }
 
   .day-cell{
@@ -1237,9 +1052,5 @@ button,input,textarea,select{
 
   .toggle-btn{
     width:100%;
-  }
-
-  .stats-grid-5{
-    grid-template-columns:1fr 1fr;
   }
 }
