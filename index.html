@@ -20,29 +20,39 @@
   </header>
 
   <main>
+
     <section id="panel-home" class="panel active">
       <section id="bannerArea"></section>
 
-      <div class="stats-grid">
+      <div class="stats-grid stats-grid-5">
         <div class="stat-card tone-blue">
           <div class="stat-label">本月活動</div>
           <div class="stat-value" id="statEvents">0</div>
-          <div class="stat-tip">活動 / 公告</div>
+          <div class="stat-tip">當月活動數</div>
         </div>
+
+        <div class="stat-card tone-purple">
+          <div class="stat-label">累計活動次數</div>
+          <div class="stat-value" id="statTotalEvents">0</div>
+          <div class="stat-tip">全部活動數</div>
+        </div>
+
         <div class="stat-card tone-red">
-          <div class="stat-label">已回覆人次</div>
+          <div class="stat-label">近三月已回覆</div>
           <div class="stat-value" id="statReplies">0</div>
-          <div class="stat-tip">即時更新</div>
+          <div class="stat-tip">三個月內統計</div>
         </div>
+
         <div class="stat-card tone-lightblue">
-          <div class="stat-label">葷食便當</div>
+          <div class="stat-label">近三月葷食</div>
           <div class="stat-value" id="statMeat">0</div>
-          <div class="stat-tip">本月累計</div>
+          <div class="stat-tip">便當統計</div>
         </div>
+
         <div class="stat-card tone-lightred">
-          <div class="stat-label">素食便當</div>
+          <div class="stat-label">近三月素食</div>
           <div class="stat-value" id="statVeg">0</div>
-          <div class="stat-tip">本月累計</div>
+          <div class="stat-tip">便當統計</div>
         </div>
       </div>
 
@@ -50,7 +60,7 @@
         <div class="block-head">
           <div>
             <h2>公告與統整</h2>
-            <p>公告、重要連結、本月統整</p>
+            <p>公告、重要連結、近三個月活動統整</p>
           </div>
           <div class="top-actions">
             <span class="tag tag-blue">📢 公告</span>
@@ -61,7 +71,7 @@
         <div id="noticeArea"></div>
 
         <div class="summary-panel">
-          <div class="summary-panel-head">📊 本月統整</div>
+          <div class="summary-panel-head">📊 近三個月統整</div>
           <div id="summaryArea"></div>
         </div>
       </section>
@@ -70,7 +80,7 @@
         <div class="block-head">
           <div>
             <h2>活動卡片</h2>
-            <p>手機版活動總覽</p>
+            <p>點擊可直接跳到定訓頁對應活動</p>
           </div>
           <span class="tag tag-red">🗂 活動</span>
         </div>
@@ -83,7 +93,7 @@
         <div class="block-head">
           <div>
             <h2>定訓活動</h2>
-            <p>大隊定訓 / 分隊定訓，直接點選回覆</p>
+            <p>大隊定訓 / 分隊定訓，活動可展開、名單可點選回覆</p>
           </div>
           <div class="top-actions">
             <span class="tag tag-blue" id="trainingCount">0 場</span>
@@ -117,7 +127,7 @@
               <span class="calendar-mini-value" id="calendarMonthEventCount">0</span>
             </div>
             <div class="calendar-mini-stat">
-              <span class="calendar-mini-label">定訓場次</span>
+              <span class="calendar-mini-label">本月定訓</span>
               <span class="calendar-mini-value" id="calendarMonthTrainingCount">0</span>
             </div>
           </div>
@@ -149,6 +159,7 @@
         <div id="monthList"></div>
       </section>
     </section>
+
   </main>
 </div>
 
