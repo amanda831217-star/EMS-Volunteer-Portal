@@ -1,5 +1,4 @@
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxQuxRMoSik7_AfrCJqeL6fMlzKOe4ISFWzkZiwvPhXhDebaQR68tEcoDmR3_k_H9Yn1w/exec';
-const ADMIN_URL = 'admin.html';
 
 const state = {
   banners: [],
@@ -7,7 +6,8 @@ const state = {
   events: [],
   calendarYear: null,
   calendarMonth: null,
-  expandedTraining: {}
+  expandedTraining: {},
+  expandedSummary: {}
 };
 
 const demoData = {
@@ -45,10 +45,19 @@ function formatDateText(dateText) {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
+function formatDateTextFull(dateText) {
+  const d = new Date(dateText + 'T00:00:00');
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function isSameDate(a, b) {
   return a.getFullYear() === b.getFullYear() &&
          a.getMonth() === b.getMonth() &&
          a.getDate() === b.getDate();
+}
+
+function getToday() {
+  return new Date();
 }
 
 function getActiveBanner() {
@@ -66,6 +75,26 @@ function getMonthEvents(year, month) {
   });
 }
 
+function getThreeMonthRange() {
+  const now = getToday();
+  const start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  end.setHours(23, 59, 59, 999);
+  return { start, end };
+}
+
+function getRecentThreeMonthEvents() {
+  const { start, end } = getThreeMonthRange();
+  return state.events.filter(e => {
+    const d = new Date(e.date + 'T00:00:00');
+    return d >= start && d <= end;
+  });
+}
+
+function getRecentThreeMonthTrainingEvents() {
+  return getRecentThreeMonthEvents().filter(e => e.type === '大隊定訓' || e.type === '分隊定訓');
+}
+
 function getMonthTrainingEvents(year, month) {
   return getTrainingEvents().filter(e => {
     const d = new Date(e.date + 'T00:00:00');
@@ -73,19 +102,38 @@ function getMonthTrainingEvents(year, month) {
   });
 }
 
+function getEventSummary(event) {
+  const members = event.members || [];
+  const joinList = members.filter(m => m.status === '參加');
+  const absentList = members.filter(m => m.status === '無法參加');
+  const pendingList = members.filter(m => !m.status);
+
+  return {
+    joined: joinList.length,
+    absent: absentList.length,
+    pending: pendingList.length,
+    meat: joinList.filter(m => m.meal === '葷食').length,
+    veg: joinList.filter(m => m.meal === '素食').length,
+    joinList,
+    absentList,
+    pendingList
+  };
+}
+
 function updateStats() {
-  const now = new Date();
+  const now = getToday();
   const year = state.calendarYear ?? now.getFullYear();
   const month = state.calendarMonth ?? now.getMonth();
 
   const monthEvents = getMonthEvents(year, month);
-  const training = getMonthTrainingEvents(year, month);
+  const threeMonthTraining = getRecentThreeMonthTrainingEvents();
+  const totalEvents = state.events.length;
 
   let replies = 0;
   let meat = 0;
   let veg = 0;
 
-  training.forEach(event => {
+  threeMonthTraining.forEach(event => {
     (event.members || []).forEach(member => {
       if (member.status) replies += 1;
       if (member.meal === '葷食') meat += 1;
@@ -94,11 +142,13 @@ function updateStats() {
   });
 
   const statEvents = document.getElementById('statEvents');
+  const statTotalEvents = document.getElementById('statTotalEvents');
   const statReplies = document.getElementById('statReplies');
   const statMeat = document.getElementById('statMeat');
   const statVeg = document.getElementById('statVeg');
 
   if (statEvents) statEvents.textContent = monthEvents.length;
+  if (statTotalEvents) statTotalEvents.textContent = totalEvents;
   if (statReplies) statReplies.textContent = replies;
   if (statMeat) statMeat.textContent = meat;
   if (statVeg) statVeg.textContent = veg;
@@ -160,6 +210,39 @@ function renderNotices() {
   `;
 }
 
+function gotoTrainingEvent(eventId) {
+  const navBtns = document.querySelectorAll('.nav-btn');
+  const panels = document.querySelectorAll('.panel');
+
+  navBtns.forEach(x => x.classList.remove('active'));
+  panels.forEach(x => x.classList.remove('active'));
+
+  const trainingBtn = document.querySelector('.nav-btn[data-panel="training"]');
+  const trainingPanel = document.getElementById('panel-training');
+
+  if (trainingBtn) trainingBtn.classList.add('active');
+  if (trainingPanel) trainingPanel.classList.add('active');
+
+  state.expandedTraining[eventId] = true;
+  renderTraining();
+
+  setTimeout(() => {
+    const card = document.getElementById(`training-card-${eventId}`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 50);
+}
+
+function bindHomeEventCards() {
+  document.querySelectorAll('[data-jump-training]').forEach(card => {
+    card.addEventListener('click', () => {
+      const eventId = card.dataset.jumpTraining;
+      gotoTrainingEvent(eventId);
+    });
+  });
+}
+
 function renderHomeEvents() {
   const el = document.getElementById('homeEventList');
   if (!el) return;
@@ -167,19 +250,25 @@ function renderHomeEvents() {
   const html = state.events
     .slice()
     .sort((a, b) => a.date.localeCompare(b.date) || Number(a.sort || 9999) - Number(b.sort || 9999))
-    .map(item => `
-      <div class="event-mobile-card">
-        <div class="event-mobile-top">
-          <div class="event-mobile-title">${escapeHtml(item.title)}</div>
-          <div class="event-mobile-type ${item.type === '大隊定訓' ? 'event-type-command' : item.type === '分隊定訓' ? 'event-type-unit' : 'event-type-other'}">
-            ${escapeHtml(item.type)}
+    .map(item => {
+      const isTraining = item.type === '大隊定訓' || item.type === '分隊定訓';
+      return `
+        <div class="event-mobile-card ${isTraining ? 'is-link' : ''}" ${isTraining ? `data-jump-training="${escapeHtml(item.id)}"` : ''}>
+          <div class="event-mobile-top">
+            <div class="event-mobile-title">${escapeHtml(item.title)}</div>
+            <div class="event-mobile-type ${item.type === '大隊定訓' ? 'event-type-command' : item.type === '分隊定訓' ? 'event-type-unit' : 'event-type-other'}">
+              ${escapeHtml(item.type)}
+            </div>
+          </div>
+          <div class="event-mobile-meta">${formatDateText(item.date)}｜${escapeHtml(item.location || '')}</div>
+          <div class="muted">${escapeHtml(item.message || '')}</div>
+          <div class="event-mobile-footer">
+            ${linkHtml(item.link)}
+            ${isTraining ? '<div class="event-mobile-linkhint">點擊前往回覆 ↗</div>' : ''}
           </div>
         </div>
-        <div class="event-mobile-meta">${formatDateText(item.date)}｜${escapeHtml(item.location || '')}</div>
-        <div class="muted">${escapeHtml(item.message || '')}</div>
-        ${linkHtml(item.link)}
-      </div>
-    `)
+      `;
+    })
     .join('');
 
   el.innerHTML = html || `
@@ -188,52 +277,131 @@ function renderHomeEvents() {
       <div class="muted">請至後台新增活動。</div>
     </div>
   `;
+
+  bindHomeEventCards();
+}
+
+function renderSummaryDetails(event, summary, isOpen) {
+  return `
+    <div class="summary-detail-wrap ${isOpen ? 'open' : ''}" id="summary-detail-${escapeHtml(event.id)}">
+      <div class="summary-group">
+        <div class="summary-group-title">參加名單</div>
+        <div class="summary-name-list">
+          ${summary.joinList.length ? summary.joinList.map(m => `
+            <div class="summary-name-item">
+              <div class="summary-name">${escapeHtml(m.name)}</div>
+              <div class="summary-meal">${escapeHtml(m.meal || '未選便當')}</div>
+            </div>
+          `).join('') : '<div class="muted">尚無參加名單</div>'}
+        </div>
+      </div>
+
+      <div class="summary-group">
+        <div class="summary-group-title">無法參加名單</div>
+        <div class="summary-name-list">
+          ${summary.absentList.length ? summary.absentList.map(m => `
+            <div class="summary-name-item">
+              <div class="summary-name">${escapeHtml(m.name)}</div>
+              <div class="summary-status-chip summary-status-absent">無法參加</div>
+            </div>
+          `).join('') : '<div class="muted">尚無無法參加名單</div>'}
+        </div>
+      </div>
+
+      <div class="summary-group">
+        <div class="summary-group-title">未回覆名單</div>
+        <div class="summary-name-list">
+          ${summary.pendingList.length ? summary.pendingList.map(m => `
+            <div class="summary-name-item">
+              <div class="summary-name">${escapeHtml(m.name)}</div>
+              <div class="summary-status-chip summary-status-pending">未回覆</div>
+            </div>
+          `).join('') : '<div class="muted">全部已回覆</div>'}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function bindSummaryToggleButtons() {
+  document.querySelectorAll('[data-toggle-summary]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const eventId = btn.dataset.toggleSummary;
+      state.expandedSummary[eventId] = !state.expandedSummary[eventId];
+      renderHomeSummary();
+    });
+  });
 }
 
 function renderHomeSummary() {
   const el = document.getElementById('summaryArea');
   if (!el) return;
 
-  const now = new Date();
-  const year = state.calendarYear ?? now.getFullYear();
-  const month = state.calendarMonth ?? now.getMonth();
-  const trainingEvents = getMonthTrainingEvents(year, month);
+  const events = getRecentThreeMonthTrainingEvents()
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date) || Number(a.sort || 9999) - Number(b.sort || 9999));
 
-  const rows = [
-    `<div class="summary-row header"><div>活動</div><div>參加</div><div>葷食</div><div>素食</div></div>`
-  ];
-
-  trainingEvents.forEach(event => {
-    const joined = (event.members || []).filter(m => m.status === '參加').length;
-    const meat = (event.members || []).filter(m => m.meal === '葷食').length;
-    const veg = (event.members || []).filter(m => m.meal === '素食').length;
-
-    rows.push(`
-      <div class="summary-row">
-        <div>${escapeHtml(event.title)}</div>
-        <div>${joined}</div>
-        <div>${meat}</div>
-        <div>${veg}</div>
+  if (!events.length) {
+    el.innerHTML = `
+      <div class="summary-card">
+        <div class="summary-card-title">近三個月無定訓活動</div>
+        <div class="muted">目前沒有可統整的定訓資料。</div>
       </div>
-    `);
-  });
-
-  if (trainingEvents.length === 0) {
-    rows.push(`
-      <div class="summary-row">
-        <div>本月無定訓</div>
-        <div>0</div>
-        <div>0</div>
-        <div>0</div>
-      </div>
-    `);
+    `;
+    return;
   }
 
-  el.innerHTML = rows.join('');
+  el.innerHTML = events.map(event => {
+    const summary = getEventSummary(event);
+    const isOpen = !!state.expandedSummary[event.id];
+
+    return `
+      <div class="summary-card">
+        <div class="summary-card-top">
+          <div>
+            <div class="summary-card-title">${escapeHtml(event.title)}</div>
+            <div class="summary-card-meta">${formatDateTextFull(event.date)}｜${escapeHtml(event.type)}｜${escapeHtml(event.location || '')}</div>
+          </div>
+          <span class="tag tag-purple">近三月</span>
+        </div>
+
+        <div class="summary-badges">
+          <div class="summary-badge">參加 ${summary.joined}</div>
+          <div class="summary-badge">無法參加 ${summary.absent}</div>
+          <div class="summary-badge">未回覆 ${summary.pending}</div>
+          <div class="summary-badge">葷食 ${summary.meat}</div>
+          <div class="summary-badge">素食 ${summary.veg}</div>
+        </div>
+
+        <div class="summary-toggle-wrap">
+          <button class="toggle-btn" type="button" data-toggle-summary="${escapeHtml(event.id)}">
+            ${isOpen ? '收起名單 ▲' : '展開名單 ▼'}
+          </button>
+        </div>
+
+        ${renderSummaryDetails(event, summary, isOpen)}
+      </div>
+    `;
+  }).join('');
+
+  bindSummaryToggleButtons();
+}
+
+function bindTrainingToggleButtons() {
+  document.querySelectorAll('[data-toggle-training]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const eventId = btn.dataset.toggleTraining;
+      state.expandedTraining[eventId] = !state.expandedTraining[eventId];
+      renderTraining();
+    });
+  });
 }
 
 function renderTraining() {
-  const trainingEvents = getTrainingEvents();
+  const trainingEvents = getTrainingEvents()
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date) || Number(a.sort || 9999) - Number(b.sort || 9999));
+
   const countEl = document.getElementById('trainingCount');
   const areaEl = document.getElementById('trainingArea');
 
@@ -241,52 +409,52 @@ function renderTraining() {
   if (!areaEl) return;
 
   const html = trainingEvents.map(event => {
-    const joined = (event.members || []).filter(m => m.status === '參加').length;
-    const meat = (event.members || []).filter(m => m.meal === '葷食').length;
-    const veg = (event.members || []).filter(m => m.meal === '素食').length;
+    const summary = getEventSummary(event);
     const isExpanded = !!state.expandedTraining[event.id];
 
     return `
-      <div class="training-card">
+      <div class="training-card" id="training-card-${escapeHtml(event.id)}">
         <div class="training-head">
-          <div>
+          <div class="training-head-left">
             <div class="training-title">${escapeHtml(event.title)}</div>
             <div class="training-meta">${formatDateText(event.date)}｜${escapeHtml(event.type)}｜${escapeHtml(event.location || '')}</div>
             <div class="muted">${escapeHtml(event.message || '')}</div>
             ${linkHtml(event.link)}
           </div>
-          <span class="tag tag-blue">${joined} 人參加</span>
+
+          <div class="training-head-right">
+            <span class="tag tag-blue">${summary.joined} 人參加</span>
+            <button class="toggle-btn" type="button" data-toggle-training="${escapeHtml(event.id)}">
+              ${isExpanded ? '收起名單 ▲' : '展開名單 ▼'}
+            </button>
+          </div>
         </div>
 
         <div class="summary-strip">
-          <div class="summary-chip">參加 ${joined} 人</div>
-          <div class="summary-chip">葷食 ${meat} 份</div>
-          <div class="summary-chip">素食 ${veg} 份</div>
+          <div class="summary-chip">參加 ${summary.joined} 人</div>
+          <div class="summary-chip">無法參加 ${summary.absent} 人</div>
+          <div class="summary-chip">未回覆 ${summary.pending} 人</div>
+          <div class="summary-chip">葷食 ${summary.meat} 份</div>
+          <div class="summary-chip">素食 ${summary.veg} 份</div>
         </div>
 
-        <div class="training-toggle-wrap">
-          <button class="toggle-btn" data-toggle-event="${event.id}">
-            ${isExpanded ? '收起名單 ▲' : '展開名單 ▼'}
-          </button>
-        </div>
-
-        <div class="member-container" id="members-${event.id}" style="display:${isExpanded ? 'block' : 'none'}">
+        <div class="member-container" id="members-${escapeHtml(event.id)}" style="display:${isExpanded ? 'block' : 'none'}">
           ${(event.members || []).map((member, idx) => `
             <div class="member-row">
               <div class="member-left">
                 <div class="member-name">${escapeHtml(member.name)}</div>
-                <div class="member-sub">點選即可回覆</div>
+                <div class="member-sub">${member.status ? escapeHtml(member.status) : '尚未回覆'}</div>
               </div>
 
               <div class="member-right">
                 <div class="btn-row">
-                  <button class="action-btn join ${member.status === '參加' ? 'active' : ''}" data-event="${event.id}" data-member="${idx}" data-status="參加">參加</button>
-                  <button class="action-btn absent ${member.status === '無法參加' ? 'active' : ''}" data-event="${event.id}" data-member="${idx}" data-status="無法參加">無法參加</button>
+                  <button class="action-btn join ${member.status === '參加' ? 'active' : ''}" data-event="${escapeHtml(event.id)}" data-member="${idx}" data-status="參加">參加</button>
+                  <button class="action-btn absent ${member.status === '無法參加' ? 'active' : ''}" data-event="${escapeHtml(event.id)}" data-member="${idx}" data-status="無法參加">無法參加</button>
                 </div>
 
                 <div class="btn-row">
-                  <button class="action-btn meat ${member.meal === '葷食' ? 'active' : ''}" ${member.status === '無法參加' ? 'disabled' : ''} data-event="${event.id}" data-member="${idx}" data-meal="葷食">葷食</button>
-                  <button class="action-btn veg ${member.meal === '素食' ? 'active' : ''}" ${member.status === '無法參加' ? 'disabled' : ''} data-event="${event.id}" data-member="${idx}" data-meal="素食">素食</button>
+                  <button class="action-btn meat ${member.meal === '葷食' ? 'active' : ''}" ${member.status === '無法參加' || !member.status ? 'disabled' : ''} data-event="${escapeHtml(event.id)}" data-member="${idx}" data-meal="葷食">葷食</button>
+                  <button class="action-btn veg ${member.meal === '素食' ? 'active' : ''}" ${member.status === '無法參加' || !member.status ? 'disabled' : ''} data-event="${escapeHtml(event.id)}" data-member="${idx}" data-meal="素食">素食</button>
                 </div>
               </div>
             </div>
@@ -329,7 +497,7 @@ function renderCalendar() {
 
   if (!gridEl || !monthListEl || !titleEl) return;
 
-  const now = new Date();
+  const now = getToday();
 
   if (state.calendarYear === null || state.calendarMonth === null) {
     if (state.events[0]) {
@@ -502,16 +670,6 @@ function bindTrainingButtons() {
       renderTraining();
       renderCalendar();
       await saveResponse(eventId, member.name, member.status, member.meal);
-    });
-  });
-}
-
-function bindTrainingToggleButtons() {
-  document.querySelectorAll('[data-toggle-event]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const eventId = btn.dataset.toggleEvent;
-      state.expandedTraining[eventId] = !state.expandedTraining[eventId];
-      renderTraining();
     });
   });
 }
