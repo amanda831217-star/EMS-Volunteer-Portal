@@ -193,7 +193,7 @@ button,input,textarea,select{
   margin-bottom:14px;
 }
 
-.stats-grid-3{
+.stats-grid-2{
   grid-template-columns:1fr 1fr;
 }
 
