@@ -197,6 +197,12 @@ button,input,textarea,select{
   grid-template-columns:1fr 1fr;
 }
 
+.home-dual-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+}
+
 .stat-card{
   border:1px solid var(--line);
   border-radius:22px;
